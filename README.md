@@ -104,6 +104,22 @@ Built in phases; **Phase 5 is the MVP cut line**, when the closed loop runs end 
 Explicitly out of scope for the MVP: Kubernetes, Kafka or streaming ingestion, feature-drift
 attribution, canary or shadow deploys, and cloud deploy (an optional later phase).
 
+## Cost and guardrails
+
+**The MVP costs roughly $0 to build and run.** Every component (Airflow, MLflow, Feast, Redis,
+Postgres, Prometheus, Grafana, and the FastAPI server) runs locally in `docker-compose`. The dataset
+is public. The tabular MLP trains on CPU in seconds, so there is no GPU, no GPU quota, and no cloud
+bill in the MVP. The only local cost is disk and memory.
+
+No billable cloud resources exist in this repo today. The guardrails apply if and when the optional
+cloud deploy (Phase 7) happens:
+
+- Infrastructure is Terraform up and down, so a session leaves nothing running.
+- Billable resources are torn down after each session (`terraform destroy`).
+- A budget alarm goes up before any cloud spend, as a habit carried over from the Go repos.
+
+The single-region ECS deploy sketched for Phase 7 costs pennies per session and is never left up.
+
 ## Local setup
 
 `.env` is required and gitignored, so Airflow's bind-mounted directories are owned by your user:
