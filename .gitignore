@@ -6,6 +6,9 @@ drift-sentinel-build-plan.MD
 # Machine-specific values (AIRFLOW_UID etc.)
 .env
 
+# Raw dataset and derived splits — versioned by checked-in hash, not by committing the bytes
+data/
+
 # Airflow runtime output
 logs/
 

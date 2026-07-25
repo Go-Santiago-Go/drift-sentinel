@@ -1,0 +1,15 @@
+{
+  "content_hash": "1f04e5bd66b1bb271dd41bcaff97fd7b237bd4cd3680340cd7316a5af00232ce",
+  "cut_fraction": 0.2,
+  "hash_algorithm": "sha256(hash_pandas_object(holdout, index=False))",
+  "holdout": {
+    "frauds": 157,
+    "rows": 56961
+  },
+  "n_rows_total": 284807,
+  "pool": {
+    "frauds": 335,
+    "rows": 227846
+  },
+  "source": "data/creditcard.csv"
+}
