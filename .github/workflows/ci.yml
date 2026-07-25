@@ -1,0 +1,29 @@
+name: CI
+
+# Run on every push and on PRs targeting main. Same triggers as the Go repos.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      # No data step on purpose. The hermetic tests (test_carve.py) synthesize their own data, so CI
+      # needs neither the 144 MB dataset nor any secret. The real frozen-seal test (test_holdout.py)
+      # skips here because the gitignored holdout is absent; it guards locally, where the data lives.
+      - name: Run tests
+        run: pytest -v

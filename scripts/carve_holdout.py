@@ -20,6 +20,7 @@ import pandas as pd
 
 RAW = "data/creditcard.csv"
 MANIFEST = Path("holdout_manifest.json")
+CUT_FRACTION = 0.20
 
 
 def content_hash(frame: pd.DataFrame) -> str:
@@ -33,23 +34,28 @@ def content_hash(frame: pd.DataFrame) -> str:
     return hashlib.sha256(row_hashes.tobytes()).hexdigest()
 
 
+def carve(df: pd.DataFrame, fraction: float = CUT_FRACTION):
+    """Order by Time and split off the earliest `fraction` as the frozen holdout.
+
+    Returns (holdout, pool). Pure on purpose: no file IO, so tests can call it on a small synthetic
+    frame. Stable sort keeps rows sharing a Time in their original order, which is what makes the
+    split, and therefore the hash, reproducible.
+    """
+    ordered = df.sort_values("Time", kind="stable").reset_index(drop=True)
+    cut = int(len(ordered) * fraction)
+    return ordered.iloc[:cut], ordered.iloc[cut:]
+
+
 def main():
-    # Step 1: read and deterministically order the data.
-    # Stable sort by Time so rows sharing a second keep their original CSV order. This is what
-    # makes "the earliest N rows" the same set on every run, which is what makes the hash mean
-    # something.
+    # Step 1: read the raw data.
     df = pd.read_csv(RAW)
-    df = df.sort_values("Time", kind="stable").reset_index(drop=True)
     print(f"loaded {len(df):,} rows")
 
-    # Step 2: split off the earliest 20% as the frozen holdout.
-    # int() floors the cut index. Rows [0, cut) are the holdout; [cut, end) are the pool that
-    # training and drift-replay draw from later. The split is positional (not a Time threshold)
-    # because the rows are already in fixed time order, and writing the pool separately means
+    # Step 2: order by Time and split off the earliest 20% as the frozen holdout.
+    # carve() is pure (no IO) so the test can exercise this exact logic on synthetic data. The pool
+    # is the remaining 80% that training and drift-replay draw from; writing it separately means
     # downstream code physically cannot touch a holdout row.
-    cut = int(len(df) * 0.20)
-    holdout = df.iloc[:cut]
-    pool = df.iloc[cut:]
+    holdout, pool = carve(df)
     print(f"holdout: {len(holdout):,} rows, {holdout['Class'].sum()} frauds")
     print(f"pool:    {len(pool):,} rows, {pool['Class'].sum()} frauds")
 
@@ -76,7 +82,7 @@ def main():
     # carve without loading the data. sort_keys + indent make the file stable and diff-friendly.
     manifest = {
         "source": RAW,
-        "cut_fraction": 0.20,
+        "cut_fraction": CUT_FRACTION,
         "n_rows_total": len(df),
         "holdout": {"rows": len(holdout), "frauds": int(holdout["Class"].sum())},
         "pool": {"rows": len(pool), "frauds": int(pool["Class"].sum())},

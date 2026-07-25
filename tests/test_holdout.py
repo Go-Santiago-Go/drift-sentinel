@@ -10,6 +10,7 @@ import sys
 from pathlib import Path
 
 import pandas as pd
+import pytest
 
 # Anchor every path to the test file, not the current directory, so the test passes no matter what
 # folder pytest is launched from.
@@ -26,6 +27,13 @@ sys.path.insert(0, str(REPO_ROOT / "scripts"))
 from carve_holdout import content_hash
 
 
+# The real holdout is gitignored, so it is absent in a fresh CI checkout. Skip there rather than
+# crash: this seal check is a local guard, and local is where the holdout can actually change. The
+# hermetic carve logic (test_carve.py) is what covers CI. See ADR 0002.
+@pytest.mark.skipif(
+    not HOLDOUT_PATH.exists(),
+    reason="holdout.parquet not present; run scripts/carve_holdout.py first",
+)
 def test_holdout_hash_matches_manifest():
     # Expected value: the seal committed to git at carve time.
     manifest = json.loads(MANIFEST_PATH.read_text())
