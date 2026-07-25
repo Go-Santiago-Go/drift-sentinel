@@ -19,7 +19,7 @@ Grafana, Airflow) wired into one closed feedback loop.
 >
 > The pitch above describes the finished design; the repo is being **built in phases and is not there
 > yet.** The infrastructure layer (Postgres, Redis, MLflow, Airflow) is up, and Phase 0 (the frozen
-> holdout, its versioning, and CI) is landing. The serving, monitoring, and training loop above it does
+> holdout, its versioning, and CI) is complete. The serving, monitoring, and training loop above it does
 > not exist yet. Per a house rule, nothing here is presented as a measured result until the system is
 > instrumented and has produced real numbers. See [Status](#status) for what actually works today.
 
@@ -92,9 +92,9 @@ in [ADR 0001](docs/adr/0001-evidence-triggered-continuous-training.md).
 
 Built in phases; **Phase 5 is the MVP cut line**, when the closed loop runs end to end.
 
-- **Phase 0 (in progress):** frozen holdout carved, content-hashed, and enforced by tests; CI; this
-  README. See [ADR 0002](docs/adr/0002-holdout-versioning-by-content-hash.md) for how the holdout is
-  versioned.
+- **Phase 0 (complete):** frozen holdout carved, content-hashed, and enforced by tests; lint and
+  pytest in CI; this README. See [ADR 0002](docs/adr/0002-holdout-versioning-by-content-hash.md) for
+  how the holdout is versioned.
 - **Phase 1:** Feast entities, feature views, offline and online stores.
 - **Phase 2:** PyTorch training, MLflow tracking, promotion gate on the frozen holdout.
 - **Phase 3:** FastAPI serving with online feature enrichment and prediction logging.

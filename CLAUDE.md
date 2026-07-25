@@ -4,11 +4,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository status
 
-**Phase 0, in progress.** The compose stack is built and healthy: Postgres, Redis, MLflow, and three Airflow
-processes. Nothing above the infrastructure layer exists yet — no feature repo, no training code, no server,
-no DAGs.
-
-Still open in Phase 0: the frozen holdout (the important one), README, CI, and a cost note.
+**Phase 0 complete. Phase 1 (Feast) is next.** The compose stack is built and healthy: Postgres, Redis,
+MLflow, and three Airflow processes. The frozen holdout is carved, content-hashed, and sealed in a committed
+manifest (`scripts/carve_holdout.py`, `holdout_manifest.json`), enforced by pytest. CI runs lint (Ruff) and
+pytest on push and PR. The README and a cost note are written. Nothing above the infrastructure and holdout
+layer exists yet: no feature repo, no training code, no server, no DAGs.
 
 The authoritative spec is a build plan kept outside version control, along with `CLAUDE.local.md`. If work
 needs a phase's definition of done or its scope table and the plan isn't available, ask rather than guess —
