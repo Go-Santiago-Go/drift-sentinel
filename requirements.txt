@@ -1,6 +1,7 @@
 pandas
 pyarrow
 pytest
+ruff
 jupyter
 ipykernel
 matplotlib

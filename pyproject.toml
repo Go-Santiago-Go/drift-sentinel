@@ -1,0 +1,7 @@
+# Tooling config for the project. Ruff is the linter (and formatter) of record.
+[tool.ruff]
+line-length = 100
+
+# Notebooks are exploratory narrative, not shipped code. Lint the source, not the story, so an
+# exploratory notebook edit can never redden CI over trivial style.
+extend-exclude = ["*.ipynb"]
