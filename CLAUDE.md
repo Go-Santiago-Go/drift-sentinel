@@ -11,8 +11,8 @@ pytest on push and PR. The README and a cost note are written. Nothing above the
 layer exists yet: no feature repo, no training code, no server, no DAGs.
 
 The authoritative spec is a build plan kept outside version control, along with `CLAUDE.local.md`. If work
-needs a phase's definition of done or its scope table and the plan isn't available, ask rather than guess —
-the invariants below are a summary of it, not a replacement.
+needs a phase's definition of done or its scope table and the plan isn't available, ask rather than guess.
+The invariants below are a summary of it, not a replacement.
 
 ### Local setup
 
@@ -47,7 +47,7 @@ These are load-bearing. Changing any of them changes what the project demonstrat
 - **Promotion is gated on that holdout.** A challenger that loses to the incumbent champion is never promoted;
   the DAG holds and alerts. This is the safety property that lets retraining be automated at all.
 - **The MLflow registry is the control plane.** The FastAPI server loads whatever version the `champion` alias
-  points at — promotion changes serving behavior with no redeploy, no image build, no restart of the pipeline.
+  points at. Promotion changes serving behavior with no redeploy, no image build, no restart of the pipeline.
   Promotion is a single metadata write in Postgres; the artifact was already written when the run was logged.
   **Use aliases, not stages.** MLflow 3 deprecated the `Production`/`Staging` stages the build plan describes;
   the current mechanism is `models:/<name>@champion`. The legacy `current_stage` column still exists on
@@ -56,7 +56,7 @@ These are load-bearing. Changing any of them changes what the project demonstrat
   the server fetches that entity's features from Redis. This is what proves offline/online parity and prevents
   training-serving skew.
 - **Every prediction is logged with its features to Postgres.** The prediction log is the raw material the
-  drift monitor consumes — without it there is nothing to compare against the reference window.
+  drift monitor consumes. Without it there is nothing to compare against the reference window.
 - **Drift is a Prometheus metric wired to a trigger, not a report.** The core thesis is "observability is a
   trigger, not a dashboard." An Evidently HTML report that a human must remember to open does not satisfy the
   definition of done.
@@ -91,7 +91,7 @@ docker compose up -d            # bring up all six services
 docker compose up -d --build    # ...rebuilding images first (needed after editing a Dockerfile)
 docker compose ps               # status + health of each service
 docker compose down             # stop; named volumes survive
-docker compose down -v          # stop and DELETE volumes — wipes the registry and all runs
+docker compose down -v          # stop and DELETE volumes (wipes the registry and all runs)
 
 docker compose exec postgres psql -U drift -d drift     # MLflow's database
 docker compose exec postgres psql -U drift -d airflow   # Airflow's database
@@ -99,7 +99,7 @@ docker compose exec postgres psql -U drift -d airflow   # Airflow's database
 
 MLflow UI on :5000, Airflow UI on :8080 (`admin`/`admin`).
 
-Not yet real — fill in as each phase lands:
+Not yet real (fill in as each phase lands):
 
 | Purpose | Command | Lands in |
 |---|---|---|
@@ -110,23 +110,23 @@ Not yet real — fill in as each phase lands:
 
 ## Compose stack notes
 
-- **Airflow runs LocalExecutor with four services**, not the official file's nine — no Celery broker, no
+- **Airflow runs LocalExecutor with four services**, not the official file's nine. No Celery broker, no
   workers, no Flower, and the triggerer is skipped since nothing uses deferrable tasks. Adding any of them
   back needs a reason.
 - **MLflow and Airflow share one Postgres server but separate databases** (`drift` and `airflow`). The
   `airflow` database is created by `docker/postgres-init.sql`, which the Postgres image runs **only when the
-  data directory is empty** — so adding anything to that script requires `docker compose down -v` to take
+  data directory is empty**, so adding anything to that script requires `docker compose down -v` to take
   effect.
 - **MLflow needs a custom image** (`docker/mlflow.Dockerfile`) because the official one ships without a
   Postgres driver.
 - **`--serve-artifacts` is load-bearing**: the training script runs on the host, so artifacts must upload over
   HTTP rather than to a container path the host cannot see.
 - Every service has a healthcheck, and every `depends_on` is gated on `service_healthy` or
-  `service_completed_successfully` — never the bare short form.
+  `service_completed_successfully`, never the bare short form.
 
 ## Metrics discipline
 
-The dataset is heavily imbalanced fraud data, so **accuracy lies** — 99.8% on a 99.8/0.2 split is the
+The dataset is heavily imbalanced fraud data, so **accuracy lies**. 99.8% on a 99.8/0.2 split is the
 do-nothing baseline. Report precision, recall, F1, and PR-AUC in `metrics.json`, and gate promotion on one of
 those, never accuracy.
 
@@ -135,7 +135,7 @@ hash and git SHA as tags.
 
 ## Scope discipline
 
-**Phase 5 is the MVP cut line** — when the closed loop runs end to end and the README GIF exists, the project
+**Phase 5 is the MVP cut line.** When the closed loop runs end to end and the README GIF exists, the project
 ships and goes on the resume. Explicitly parked, and not to be reintroduced without a reason: Kafka or any
 streaming ingestion, Kubernetes, SHAP/feature-drift attribution, canary and shadow deploys, multi-GPU
 training, multi-model serving, and cloud deploy (optional Phase 7, after the MVP is already on the resume).
